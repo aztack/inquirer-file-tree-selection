@@ -1,16 +1,16 @@
-## Inquirer File Tree Selection Prompt
+## Inquirer Dir Select Prompt
 
-[![Node.js Package](https://github.com/anc95/inquirer-file-tree-selection/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/anc95/inquirer-file-tree-selection/actions/workflows/npm-publish.yml)
+> This repo forked from `https://github.com/anc95/inquirer-file-tree-selection`
+> - Add `isShow` options to filter the files and directories.
+> - Add ESM+CJS support at the same time
 
 ### QuickDemo
 ![QuickDemo](./example/screenshot.gif)
 
 ### Install
 ```sh
-npm install inquirer-file-tree-selection-prompt
+npm install inquirer-dir-select-prompt
 ```
-
-> If you are still using CJS, please install `inquirer-file-tree-selection-prompt@^1`
 
 ### Usage
 ```js
@@ -18,7 +18,9 @@ inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 
 inquirer.prompt({
   type: 'file-tree-selection',
-  ...
+  isShow(item, parentPath) {
+    return item.name !== 'node_modules' && item.name[0] !== '.';
+  }
 })
 ```
 
@@ -27,8 +29,9 @@ Takes `type`, `name`, `message`, [`filter`, `validate`, `transformer`, `default`
 
 The extra options that this plugin provides are:
 - `onlyShowDir`:  (Boolean) if true, will only show directory. Default: false.
-- `root`: (String) it is the root of file tree. Default: process.cwd(). 
+- `root`: (String) it is the root of file tree. Default: process.cwd().
 - `onlyShowValid`: (Boolean) if true, will only show valid files (if `validate` is provided). Default: false.
+- `isShow`: (Function) a hook function to filter the display of directory or file name.
 - `hideChildrenOfValid`: (Boolean) if true, will hide children of valid directories (if `validate` is provided). Default: false.
 - `transformer`: (Function) a hook function to transform the display of directory or file name.
 - `multiple`: (Boolean) if true, will enable to select multiple files. Default: false.
@@ -57,7 +60,7 @@ ESM (version ^2)
 
 ```js
 import inquirer from 'inquirer'
-import inquirerFileTreeSelection from 'inquirer-file-tree-selection-prompt'
+import inquirerFileTreeSelection from 'inquirer-dir-select-prompt'
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 
@@ -77,7 +80,7 @@ CJS (version ^1 and <2)
 
 ```js
 const inquirer = require('inquirer')
-const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
+const inquirerFileTreeSelection = require('inquirer-dir-select-prompt')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 

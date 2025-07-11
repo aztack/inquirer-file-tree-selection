@@ -1,10 +1,11 @@
 {
-  "name": "inquirer-file-tree-selection-prompt",
-  "version": "2.0.5",
-  "repository": "https://github.com/anc95/inquirer-file-tree-selection",
+  "name": "inquirer-dir-select-prompt",
+  "version": "1.0.0-alpha.1",
+  "repository": "https://github.com/aztack/inquirer-file-tree-selection",
   "description": "inquerer file tree selection prompt",
-  "exports": "./dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.cjs",
+  "exports": "./dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "type": "module",
   "engines": {
     "node": ">=14.16"
@@ -12,8 +13,10 @@
   "scripts": {
     "changelog": "auto-changelog",
     "postpublish": "npm run changelog && git push origin --all; git push origin --tags",
-    "prepublishOnly": "tsc",
-    "build": "tsc"
+    "prepublish": "npm run build",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build": "npm run build:esm && npm run build:cjs"
   },
   "files": [
     "dist"
@@ -25,7 +28,7 @@
     "inquirer",
     "filetree"
   ],
-  "author": "anc95",
+  "author": "aztack",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.0.1",
