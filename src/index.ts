@@ -29,6 +29,10 @@ type FileTreeSelectionPromptOptions<T = any> = Pick<Question<T>, 'type' | 'name'
    */
   onlyShowDir?: boolean
   /**
+   * filter
+   */
+  isShow?: (item: fs.Dirent, parentPath: string) => boolean
+  /**
    * if true, will only show valid files (if validate is provided). Default: false.
    */
   onlyShowValid?: boolean
@@ -81,7 +85,7 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
 
     return {
       children: [this.rootNode]
-    } 
+    }
   }
 
   constructor(questions, rl, answers) {
@@ -257,7 +261,14 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
         return;
       }
 
-      const children = fs.readdirSync(parentPath, {withFileTypes: true}).map(item => {
+      let children = fs.readdirSync(parentPath, {withFileTypes: true});
+      const { isShow } = this.opt;
+      if (typeof isShow === 'function') {
+        children = children.filter(it => {
+          return isShow(it, parentPath);
+        });
+      }
+      node.children = children.map(item => {
         return {
           parent: node,
           type: item.isFile() ? 'file' : 'directory' as ('directory' | 'file'),
@@ -266,7 +277,6 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
         }
       });
 
-      node.children = children;
     } catch (e) {
       // maybe for permission denied, we cant read the dir
       // do nothing here
@@ -429,7 +439,7 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
     }
 
     this.active = this.shownList[index]
-    
+
     if (this.active.name !== '..') {
       this.prepareChildren(this.active);
     }
