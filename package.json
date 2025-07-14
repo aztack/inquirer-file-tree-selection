@@ -1,12 +1,16 @@
 {
   "name": "inquirer-dir-select-prompt",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "repository": "https://github.com/aztack/inquirer-file-tree-selection",
-  "description": "inquerer file tree selection prompt",
-  "main": "dist/cjs/index.cjs",
-  "exports": "./dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "description": "inquirer file tree selection prompt",
   "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.mjs",
+  "types": "dist/esm/index.d.ts",
+  "exports": {
+    "require": "./dist/cjs/index.cjs",
+    "import": "./dist/esm/index.mjs"
+  },
   "engines": {
     "node": ">=14.16"
   },
@@ -14,8 +18,12 @@
     "changelog": "auto-changelog",
     "postpublish": "npm run changelog && git push origin --all; git push origin --tags",
     "prepublish": "npm run build",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.json && npm run rename-to-mjs && npm run fix-esm-imports",
+    "build:cjs": "npm run install:bun && bun build src/index.ts --outfile dist/cjs/index.cjs --format cjs --target node",
+    "rename-to-mjs": "find dist/esm -name '*.js' -exec sh -c 'mv \"$1\" \"${1%.js}.mjs\"' _ {} \\;",
+    "fix-esm-imports": "find dist/esm -name '*.mjs' -exec sed -i '' -e 's/utils.js\/utils.mjs/g' -e 's/upperDir.js\/upperDir.mjs/g' {} \\;",
+    "install:bun": "command -v bun >/dev/null 2>&1 || curl -fsSL https://bun.sh/install | bash",
+    "clean": "rm -rf dist",
     "build": "npm run build:esm && npm run build:cjs"
   },
   "files": [
@@ -31,14 +39,17 @@
   "author": "aztack",
   "license": "ISC",
   "dependencies": {
+    "@rollup/plugin-typescript": "^12.1.4",
     "chalk": "^5.0.1",
     "cli-cursor": "^4.0.0",
     "figures": "^4.0.1",
+    "rollup": "^4.44.2",
+    "rollup-plugin-dts": "^6.2.1",
     "rxjs": "^7.5.6"
   },
   "devDependencies": {
-    "@types/node": "^18.6.3",
     "@types/inquirer": "^9.0.0",
+    "@types/node": "^18.6.3",
     "auto-changelog": "^2.2.1",
     "inquirer": "^9.1.0",
     "typescript": "^4.7.4"

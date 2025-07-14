@@ -3,8 +3,6 @@
  * `file-tree-slection` type prompt
  */
 
-import chalk from 'chalk';
-import figures from 'figures';
 import cliCursor from 'cli-cursor';
 import path from 'node:path';
 import fs from 'node:fs'
@@ -17,6 +15,31 @@ import Paginator from 'inquirer/lib/utils/paginator.js';
 import { Node } from './types.js';
 import { isSubPath } from './utils.js';
 import { getUpperDirNode } from './upperDir.js';
+
+const figures = {
+	arrowUp: '↑',
+	arrowDown: '↓',
+	arrowLeft: '←',
+	arrowRight: '→',
+  play: '▶',
+  radioOn: '◉',
+	radioOff: '◯',
+};
+
+const chalk = {
+  red(text: string) {
+    return `\x1b[31m${text}\x1b[0m`;
+  },
+  dim(text: string) {
+    return `\x1b[2m${text}\x1b[0m`;
+  },
+  green(text: string) {
+    return `\x1b[32m${text}\x1b[0m`;
+  },
+  cyan(text: string) {
+    return `\x1b[36m${text}\x1b[0m`;
+  }
+};
 
 type FileTreeSelectionPromptOptions<T = any> = Pick<Question<T>, 'type' | 'name' | 'message' | 'filter' | 'validate' | 'default'> & {
   transformer?: Transformer<T>
@@ -32,6 +55,23 @@ type FileTreeSelectionPromptOptions<T = any> = Pick<Question<T>, 'type' | 'name'
    * filter
    */
   isShow?: (item: fs.Dirent, parentPath: string) => boolean
+
+  /* i18n config */
+  i18n?: {
+    /**
+     * .(root directory)
+     */
+    rootDirectory?: string;
+    /**
+     * (Press \`Space\` to go parent directory)
+     */
+    pressSpaceToGoToParentDirectory?: string;
+    /**
+     * (Use arrow keys, Use space to toggle folder)
+     */
+    UseArrowKeysUseSpaceToToggleFolder?: string;
+  };
+
   /**
    * if true, will only show valid files (if validate is provided). Default: false.
    */
@@ -95,7 +135,7 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
     const rootNode: Node = {
       path: root,
       type: 'directory',
-      name: '.(root directory)',
+      name: this.opt.i18n?.rootDirectory ?? '.(root directory)',
       _rootNode: true
     }
 
@@ -183,7 +223,7 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
 
       await this.prepareChildren(rootNode);
       rootNode.open = true;
-      this.active = this.active || rootNode.children[0];
+      this.active = this.active || rootNode.children[0] || rootNode;
       this.prepareChildren(this.active);
       this.render()
     }
@@ -227,7 +267,8 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
         : 0 ;
 
       if (itemPath.name == '..') {
-        showValue = `${' '.repeat(safeIndent)}${prefix}..(Press \`Space\` to go parent directory)\n`
+        const text = this.opt.i18n?.pressSpaceToGoToParentDirectory ?? `(Press \`Space\` to go parent directory)`
+        showValue = `${' '.repeat(safeIndent)}${prefix}..${text}\n`
       } else if (transformer) {
         const transformedValue = transformer(itemPath.path, this.answers, { isFinal });
         showValue = ' '.repeat(safeIndent) + prefix + transformedValue + '\n';
@@ -263,12 +304,7 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
 
       let children = fs.readdirSync(parentPath, {withFileTypes: true});
       const { isShow } = this.opt;
-      if (typeof isShow === 'function') {
-        children = children.filter(it => {
-          return isShow(it, parentPath);
-        });
-      }
-      node.children = children.map(item => {
+      let _children = children.map(item => {
         return {
           parent: node,
           type: item.isFile() ? 'file' : 'directory' as ('directory' | 'file'),
@@ -276,6 +312,14 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
           path: path.resolve(parentPath, item.name)
         }
       });
+      if (typeof isShow === 'function') {
+        _children = _children.filter(it => {
+          // @ts-ignore
+          return isShow(it, parentPath);
+        })
+      }
+
+      node.children = _children;
 
     } catch (e) {
       // maybe for permission denied, we cant read the dir
@@ -376,7 +420,8 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
     var message = this.getQuestion();
 
     if (this.firstRender) {
-      message += chalk.dim('(Use arrow keys, Use space to toggle folder)');
+      const text = this.opt.i18n?.UseArrowKeysUseSpaceToToggleFolder ?? 'Use arrow keys, Use space to toggle folder';
+      message += chalk.dim(text);
     }
 
     if (this.status === 'answered') {
