@@ -16,7 +16,7 @@ import { Node } from './types.js';
 import { isSubPath } from './utils.js';
 import { getUpperDirNode } from './upperDir.js';
 
-const figures = {
+export const figures = {
 	arrowUp: '↑',
 	arrowDown: '↓',
 	arrowLeft: '←',
@@ -26,7 +26,7 @@ const figures = {
 	radioOff: '◯',
 };
 
-const chalk = {
+export const chalk = {
   red(text: string) {
     return `\x1b[31m${text}\x1b[0m`;
   },
@@ -70,6 +70,10 @@ type FileTreeSelectionPromptOptions<T = any> = Pick<Question<T>, 'type' | 'name'
      * (Use arrow keys, Use space to toggle folder)
      */
     UseArrowKeysUseSpaceToToggleFolder?: string;
+    /**
+     * '----------------';
+     */
+    pageSeparator?: string
   };
 
   /**
@@ -430,7 +434,8 @@ class FileTreeSelectionPrompt extends Base<FileTreeSelectionPromptOptions & {sta
     else {
       this.shownList = []
       const fileTreeStr = this.renderFileTree()
-      message += '\n' + this.paginator.paginate(fileTreeStr + '----------------', this.shownList.indexOf(this.active), this.opt.pageSize);
+      const pageSeparator = this.opt.i18n?.pageSeparator ?? '----------------';
+      message += '\n' + this.paginator.paginate(fileTreeStr + pageSeparator, this.shownList.indexOf(this.active), this.opt.pageSize);
     }
 
     let bottomContent;

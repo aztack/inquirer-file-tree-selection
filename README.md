@@ -31,13 +31,58 @@ The extra options that this plugin provides are:
 - `onlyShowDir`:  (Boolean) if true, will only show directory. Default: false.
 - `root`: (String) it is the root of file tree. Default: process.cwd().
 - `onlyShowValid`: (Boolean) if true, will only show valid files (if `validate` is provided). Default: false.
-- `isShow`: (Function) a hook function to filter the display of directory or file name.
 - `hideChildrenOfValid`: (Boolean) if true, will hide children of valid directories (if `validate` is provided). Default: false.
 - `transformer`: (Function) a hook function to transform the display of directory or file name.
 - `multiple`: (Boolean) if true, will enable to select multiple files. Default: false.
 - `enableGoUpperDirectory`: (Boolean) Show `..` in inside root dir, and the user can press **space** on it to go upper directory. Default: false.
+  When `multiple` is enabled, `default` should be `string[]` type, otherwise it's `string` type.
 
-When `multiple` is enabled, `default` should be `string[]` type, otherwise it's `string` type.
+This fork added following options:
+
+- `isShow`: (Function) a hook function to filter the display of directory or file name.
+- `i18n`:
+```ts
+  /* i18n config */
+  i18n?: {
+    /**
+     * .(root directory)
+     */
+    rootDirectory?: string;
+    /**
+     * (Press \`Space\` to go parent directory)
+     */
+    pressSpaceToGoToParentDirectory?: string;
+    /**
+     * (Use arrow keys, Use space to toggle folder)
+     */
+    UseArrowKeysUseSpaceToToggleFolder?: string;
+    /**
+     * '----------------';
+     */
+    pageSeparator?: string
+  };
+```
+
+## Symbols customization
+
+```ts
+// Builtin symbols
+export const figures = {
+  arrowDown: '↓',
+  arrowRight: '→',
+  play: '▶',
+  radioOn: '◉',
+  radioOff: '◯',
+};
+```
+
+Customization:
+
+```ts
+import {figures} from 'inquirer-file-tree-selection-prompt';
+figures.arrowRight = '▶';
+```
+
 ### Typescript Support
 
 > version >= 1.0.16
@@ -75,8 +120,6 @@ inquirer
     console.log(JSON.stringify(answers))
   });
 ```
-
-CJS (version ^1 and <2)
 
 ```js
 const inquirer = require('inquirer')
