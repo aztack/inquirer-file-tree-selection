@@ -16,7 +16,7 @@
   },
   "scripts": {
     "changelog": "auto-changelog",
-    "postpublish": "npm run changelog && git push origin --all; git push origin --tags",
+    "postpublish": "git push origin --all; git push origin --tags",
     "prepublish": "npm run build",
     "build:esm": "tsc -p tsconfig.json && npm run rename-to-mjs && npm run fix-esm-imports",
     "build:cjs": "npm run install:bun && bun build src/index.ts --outfile dist/cjs/index.cjs --format cjs --target node",
@@ -29,9 +29,6 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "keywords": [
     "inquirer",
     "filetree"
